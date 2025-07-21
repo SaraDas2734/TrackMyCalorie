@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+
+{% block title %}Supplements{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center mb-0">Log Supplement</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="supplement_name" class="form-label">Supplement</label>
+                        <select class="form-select" id="supplement_name" name="supplement_name" required>
+                            <option value="">Select supplement</option>
+                            <option value="whey protein">Whey Protein</option>
+                            <option value="creatine">Creatine</option>
+                            <option value="pea protein">Pea Protein</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="serving_size" class="form-label">Serving Size</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="serving_size" name="serving_size"
+                                   required step="0.5" min="0.5">
+                            <span class="input-group-text">scoops</span>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Log Supplement</button>
+                        <a href="{{ url_for('home') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Supplements Reference -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3 class="mb-0">Supplements Reference</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Supplement</th>
+                                <th>Serving Size</th>
+                                <th>Calories</th>
+                                <th>Protein</th>
+                                <th>Other Benefits</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Whey Protein</td>
+                                <td>1 scoop (30g)</td>
+                                <td>120</td>
+                                <td>24g</td>
+                                <td>Fast absorption, complete amino acid profile</td>
+                            </tr>
+                            <tr>
+                                <td>Creatine</td>
+                                <td>5g</td>
+                                <td>0</td>
+                                <td>0g</td>
+                                <td>Increases strength, muscle mass, and exercise performance</td>
+                            </tr>
+                            <tr>
+                                <td>Pea Protein</td>
+                                <td>1 scoop (30g)</td>
+                                <td>100</td>
+                                <td>21g</td>
+                                <td>Plant-based, good for lactose intolerant individuals</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

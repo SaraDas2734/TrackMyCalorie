@@ -1,0 +1,127 @@
+{% extends "layout.html" %}
+
+{% block title %}Add Meal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center mb-0">Add Meal</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="add-meal-form">
+                    <div class="mb-3">
+                        <label for="food_name" class="form-label">Food Description</label>
+                        <input type="text" class="form-control" id="food_name" name="food_name" required placeholder="e.g. 2 roti with dal, 1 bowl poha, etc.">
+                        <div id="combo-prompt" class="alert alert-warning mt-2 d-none" style="font-size: 0.95em;"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-info w-100" id="calculate-calories-btn">Calculate Calories</button>
+                    </div>
+
+                    <div id="ai-error" class="alert alert-danger d-none mb-3"></div>
+
+                    <div class="mb-3 row">
+                        <div class="col">
+                            <label class="form-label">Calories</label>
+                            <input type="number" step="0.1" class="form-control" id="calories" name="calories" readonly>
+                        </div>
+                        <div class="col">
+                            <label class="form-label">Protein (g)</label>
+                            <input type="number" step="0.1" class="form-control" id="protein" name="protein" readonly>
+                        </div>
+                        <div class="col">
+                            <label class="form-label">Carbs (g)</label>
+                            <input type="number" step="0.1" class="form-control" id="carbs" name="carbs" readonly>
+                        </div>
+                        <div class="col">
+                            <label class="form-label">Fats (g)</label>
+                            <input type="number" step="0.1" class="form-control" id="fats" name="fats" readonly>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Add Meal</button>
+                        <a href="{{ url_for('home') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const foodNameInput = document.getElementById('food_name');
+const caloriesInput = document.getElementById('calories');
+const proteinInput = document.getElementById('protein');
+const carbsInput = document.getElementById('carbs');
+const fatsInput = document.getElementById('fats');
+const comboPrompt = document.getElementById('combo-prompt');
+const calculateBtn = document.getElementById('calculate-calories-btn');
+const aiErrorDiv = document.getElementById('ai-error');
+
+function checkComboPrompt(val) {
+    if (val.includes('+') || val.includes(',')) {
+        comboPrompt.textContent = "It looks like you entered a combo meal. For best accuracy, describe each item (e.g., '2 roti, aloo ki sabzi, tandoori sauce').";
+        comboPrompt.classList.remove('d-none');
+    } else {
+        comboPrompt.textContent = '';
+        comboPrompt.classList.add('d-none');
+    }
+}
+
+foodNameInput.addEventListener('input', function() {
+    checkComboPrompt(foodNameInput.value);
+});
+
+calculateBtn.addEventListener('click', function() {
+    const query = foodNameInput.value.trim();
+    if (!query) return;
+    aiErrorDiv.classList.add('d-none');
+    aiErrorDiv.textContent = '';
+    caloriesInput.value = '';
+    proteinInput.value = '';
+    carbsInput.value = '';
+    fatsInput.value = '';
+    calculateBtn.disabled = true;
+    calculateBtn.textContent = 'Calculating...';
+    fetch('/api/gemini_calories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+    })
+    .then(res => res.json())
+    .then(data => {
+        calculateBtn.disabled = false;
+        calculateBtn.textContent = 'Calculate Calories';
+        if (data.result) {
+            // Try to extract numbers from the AI result
+            const text = data.result;
+            const calMatch = text.match(/Calories:\s*(\d+)/i);
+            const protMatch = text.match(/Protein:\s*(\d+)/i);
+            const carbMatch = text.match(/Carbs:\s*(\d+)/i);
+            const fatMatch = text.match(/Fats?:\s*(\d+)/i);
+            if (calMatch) caloriesInput.value = calMatch[1];
+            if (protMatch) proteinInput.value = protMatch[1];
+            if (carbMatch) carbsInput.value = carbMatch[1];
+            if (fatMatch) fatsInput.value = fatMatch[1];
+            if (!calMatch && !protMatch && !carbMatch && !fatMatch) {
+                aiErrorDiv.textContent = 'Could not extract values. Try rephrasing.';
+                aiErrorDiv.classList.remove('d-none');
+            }
+        } else {
+            aiErrorDiv.textContent = 'Could not estimate. Try rephrasing.';
+            aiErrorDiv.classList.remove('d-none');
+        }
+    })
+    .catch(() => {
+        calculateBtn.disabled = false;
+        calculateBtn.textContent = 'Calculate Calories';
+        aiErrorDiv.textContent = 'API error. Try again later.';
+        aiErrorDiv.classList.remove('d-none');
+    });
+});
+</script>
+{% endblock %}

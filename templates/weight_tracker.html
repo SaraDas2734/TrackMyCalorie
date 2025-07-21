@@ -1,0 +1,129 @@
+{% extends "layout.html" %}
+
+{% block title %}Weight Tracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <!-- Weight Input Form -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="text-center mb-0">Log Weight</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="weight" class="form-label">Weight (kg)</label>
+                        <input type="number" class="form-control" id="weight" name="weight"
+                               required step="0.1" min="30" max="300">
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Log Weight</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Weight History Graph -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="mb-0">Weight Progress</h3>
+            </div>
+            <div class="card-body">
+                <div id="weight-chart"></div>
+            </div>
+        </div>
+
+        <!-- Weight History Table -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Weight History</h3>
+            </div>
+            <div class="card-body">
+                {% if weight_logs %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Weight (kg)</th>
+                                    <th>Change</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% set prev_weight = None %}
+                                {% for log in weight_logs %}
+                                    <tr>
+                                        <td>{{ log.date }}</td>
+                                        <td>{{ log.weight|round(1) }}</td>
+                                        <td>
+                                            {% if prev_weight %}
+                                                {% set change = log.weight - prev_weight %}
+                                                <span class="{% if change > 0 %}text-success{% elif change < 0 %}text-danger{% endif %}">
+                                                    {{ change|round(1) }} kg
+                                                </span>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% set prev_weight = log.weight %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-center text-muted my-3">No weight logs yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if weight_logs %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dates = [
+            {% for log in weight_logs %}
+                "{{ log.date }}"{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+        const weights = [
+            {% for log in weight_logs %}
+                {{ log.weight|round(1) }}{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+        
+        const trace = {
+            x: dates,
+            y: weights,
+            type: 'scatter',
+            mode: 'lines+markers',
+            line: {
+                color: '#007bff',
+                width: 2
+            },
+            marker: {
+                size: 8,
+                color: '#007bff'
+            }
+        };
+        
+        const layout = {
+            title: 'Weight Progress Over Time',
+            xaxis: {
+                title: 'Date',
+                showgrid: true
+            },
+            yaxis: {
+                title: 'Weight (kg)',
+                showgrid: true
+            },
+            showlegend: false
+        };
+        
+        Plotly.newPlot('weight-chart', [trace], layout);
+    });
+</script>
+{% endif %}
+{% endblock %}

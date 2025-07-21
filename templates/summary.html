@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block title %}Summary{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Daily Summary for {{ user.name }}</h2>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4>Today's Intake</h4>
+            <ul>
+                <li><strong>Calories:</strong> {{ total_calories|round(1) }} / {{ targets.calories }} (Remaining: {{ remaining_calories|round(1) }})</li>
+                <li><strong>Protein:</strong> {{ total_protein|round(1) }}g / {{ targets.protein }}g (Remaining: {{ remaining_protein|round(1) }}g)</li>
+                <li><strong>Carbs:</strong> {{ targets.carbs }}g (target)</li>
+                <li><strong>Fats:</strong> {{ targets.fats }}g (target)</li>
+            </ul>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            {% if remaining_calories > 0 or remaining_protein > 0 %}
+                <h5>Keep going! 💪</h5>
+                <p>
+                    {% if remaining_calories > 0 %}
+                        {{ remaining_calories|round(1) }} calories left to reach your goal.<br>
+                    {% endif %}
+                    {% if remaining_protein > 0 %}
+                        {{ remaining_protein|round(1) }}g protein left to reach your goal.
+                    {% endif %}
+                </p>
+            {% else %}
+                <h5>Goal hit! 🎉</h5>
+                <p>You've reached your calorie and protein targets for today!</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

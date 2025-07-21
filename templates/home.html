@@ -1,0 +1,183 @@
+{% extends "layout.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Daily Progress -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="mb-0">Daily Progress</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Calories -->
+                    <div class="col-md-6 mb-3">
+                        <div class="progress-card p-3 border rounded">
+                            <h4>Calories</h4>
+                            <div class="progress mb-2" style="height: 25px;">
+                                {% set calorie_percent = (totals.calories / targets.calories * 100)|round|int %}
+                                <div class="progress-bar {% if calorie_percent > 100 %}bg-danger{% endif %}"
+                                     role="progressbar"
+                                     style="width: {{ [calorie_percent, 100]|min }}%">
+                                    {{ totals.calories|int }}/{{ targets.calories|int }}
+                                </div>
+                            </div>
+                            <small class="text-muted">Target: {{ targets.calories|int }} kcal</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Protein -->
+                    <div class="col-md-6 mb-3">
+                        <div class="progress-card p-3 border rounded">
+                            <h4>Protein</h4>
+                            <div class="progress mb-2" style="height: 25px;">
+                                {% set protein_percent = (totals.protein / targets.protein * 100)|round|int %}
+                                <div class="progress-bar bg-success {% if protein_percent > 100 %}bg-danger{% endif %}"
+                                     role="progressbar"
+                                     style="width: {{ [protein_percent, 100]|min }}%">
+                                    {{ totals.protein|round(1) }}/{{ targets.protein|round(1) }}g
+                                </div>
+                            </div>
+                            <small class="text-muted">Target: {{ targets.protein|round(1) }}g</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Carbs -->
+                    <div class="col-md-6 mb-3">
+                        <div class="progress-card p-3 border rounded">
+                            <h4>Carbs</h4>
+                            <div class="progress mb-2" style="height: 25px;">
+                                {% set carbs_percent = (totals.carbs / targets.carbs * 100)|round|int %}
+                                <div class="progress-bar bg-info {% if carbs_percent > 100 %}bg-danger{% endif %}"
+                                     role="progressbar"
+                                     style="width: {{ [carbs_percent, 100]|min }}%">
+                                    {{ totals.carbs|round(1) }}/{{ targets.carbs|round(1) }}g
+                                </div>
+                            </div>
+                            <small class="text-muted">Target: {{ targets.carbs|round(1) }}g</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Fats -->
+                    <div class="col-md-6 mb-3">
+                        <div class="progress-card p-3 border rounded">
+                            <h4>Fats</h4>
+                            <div class="progress mb-2" style="height: 25px;">
+                                {% set fats_percent = (totals.fats / targets.fats * 100)|round|int %}
+                                <div class="progress-bar bg-warning {% if fats_percent > 100 %}bg-danger{% endif %}"
+                                     role="progressbar"
+                                     style="width: {{ [fats_percent, 100]|min }}%">
+                                    {{ totals.fats|round(1) }}/{{ targets.fats|round(1) }}g
+                                </div>
+                            </div>
+                            <small class="text-muted">Target: {{ targets.fats|round(1) }}g</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Meals -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Today's Meals</h3>
+                <a href="{{ url_for('add_meal') }}" class="btn btn-primary btn-sm">Add Meal</a>
+            </div>
+            <div class="card-body">
+                {% if meals %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Food</th>
+                                    <th>Portion</th>
+                                    <th>Calories</th>
+                                    <th>Protein</th>
+                                    <th>Carbs</th>
+                                    <th>Fats</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for meal in meals %}
+                                <tr>
+                                    <td>{{ meal.food_name }}</td>
+                                    <td>{{ meal.portion_size }}</td>
+                                    <td>{{ meal.calories|round(1) }}</td>
+                                    <td>{{ meal.protein|round(1) }}g</td>
+                                    <td>{{ meal.carbs|round(1) }}g</td>
+                                    <td>{{ meal.fats|round(1) }}g</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-center text-muted my-3">No meals logged today</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions and Motivation -->
+    <div class="col-md-4">
+        <!-- Quick Actions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="mb-0">Quick Actions</h3>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('add_meal') }}" class="btn btn-primary">
+                        <i class="fas fa-plus-circle"></i> Add Meal
+                    </a>
+                    <a href="{{ url_for('supplements') }}" class="btn btn-success">
+                        <i class="fas fa-pills"></i> Log Supplement
+                    </a>
+                    <a href="{{ url_for('weight_tracker') }}" class="btn btn-info">
+                        <i class="fas fa-weight"></i> Log Weight
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Motivation Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Today's Progress</h3>
+            </div>
+            <div class="card-body">
+                {% set calories_remaining = targets.calories - totals.calories %}
+                {% set protein_remaining = targets.protein - totals.protein %}
+                
+                {% if calories_remaining > 0 and protein_remaining > 0 %}
+                    <div class="alert alert-info">
+                        <h5>Keep Going! 💪</h5>
+                        <p>You still need:</p>
+                        <ul>
+                            <li>{{ calories_remaining|int }} calories</li>
+                            <li>{{ protein_remaining|round(1) }}g protein</li>
+                        </ul>
+                    </div>
+                {% elif calories_remaining <= 0 and protein_remaining <= 0 %}
+                    <div class="alert alert-success">
+                        <h5>Great Job! 🎉</h5>
+                        <p>You've hit your targets for today!</p>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        <h5>Almost There! 🎯</h5>
+                        {% if calories_remaining > 0 %}
+                            <p>{{ calories_remaining|int }} calories to go!</p>
+                        {% endif %}
+                        {% if protein_remaining > 0 %}
+                            <p>{{ protein_remaining|round(1) }}g protein to go!</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

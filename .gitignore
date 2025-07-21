@@ -1,0 +1,7 @@
+.cursor/
+__pycache__/
+*.pyc
+*.db
+.env
+.vscode/
+*.log 
