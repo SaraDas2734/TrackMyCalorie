@@ -70,12 +70,7 @@
                         </div>
                         
                         <div class="mb-4">
-                            {% if suggestion and explanation %}
-                                <div class="alert alert-info" role="alert">
-                                    <strong>Suggestion:</strong> {{ suggestion|capitalize }}<br>
-                                    <span>{{ explanation }}</span>
-                                </div>
-                            {% endif %}
+                            <div id="suggestion-box" style="display:none;"></div>
                             <label for="goal" class="form-label">Fitness Goal</label>
                             <select class="form-select" id="goal" name="goal" required>
                                 <option value="">Select your goal</option>
@@ -85,6 +80,37 @@
                                 <option value="lean_bulk" {% if user and user.goal == 'lean_bulk' %}selected{% endif %}>Lean Bulk (gain muscle, minimal fat)</option>
                             </select>
                         </div>
+                        <script>
+                        function getSuggestion() {
+                            const gender = document.getElementById('gender').value;
+                            const height = document.getElementById('height').value;
+                            const age = document.getElementById('age').value;
+                            const weight = document.getElementById('weight').value;
+                            if (gender && height && age && weight) {
+                                fetch(`/api/suggest_goal?gender=${gender}&height=${height}&age=${age}&weight=${weight}`)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        const box = document.getElementById('suggestion-box');
+                                        if (data.suggestion && data.explanation) {
+                                            box.style.display = '';
+                                            box.className = 'alert alert-info';
+                                            box.innerHTML = `<strong>Suggestion:</strong> ${data.suggestion.charAt(0).toUpperCase() + data.suggestion.slice(1)}<br><span>${data.explanation}</span>`;
+                                        } else {
+                                            box.style.display = 'none';
+                                        }
+                                    })
+                                    .catch(() => {
+                                        document.getElementById('suggestion-box').style.display = 'none';
+                                    });
+                            } else {
+                                document.getElementById('suggestion-box').style.display = 'none';
+                            }
+                        }
+                        document.getElementById('gender').addEventListener('change', getSuggestion);
+                        document.getElementById('height').addEventListener('input', getSuggestion);
+                        document.getElementById('age').addEventListener('input', getSuggestion);
+                        document.getElementById('weight').addEventListener('input', getSuggestion);
+                        </script>
                         
                         <div class="text-center">
                             <button type="submit" class="btn btn-success btn-lg">Save</button>

@@ -385,5 +385,16 @@ def gemini_calories():
         return jsonify({'error': 'Invalid response from Gemini', 'details': result}), 500
     return jsonify({'result': ai_text})
 
+@app.route('/api/suggest_goal')
+def api_suggest_goal():
+    gender = request.args.get('gender')
+    height = request.args.get('height', type=float)
+    age = request.args.get('age', type=int)
+    weight = request.args.get('weight', type=float)
+    if not all([gender, height, age, weight]):
+        return jsonify({'error': 'Missing parameters'}), 400
+    suggestion, explanation = suggest_goal(gender, height, age, weight)
+    return jsonify({'suggestion': suggestion, 'explanation': explanation})
+
 if __name__ == '__main__':
     app.run(debug=True)
