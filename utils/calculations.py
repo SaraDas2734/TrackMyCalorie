@@ -44,3 +44,23 @@ def calculate_macros(tdee, goal, weight):
         'carbs': carbs,
         'fats': fats
     }
+
+def suggest_goal(gender, height, age, weight):
+    """
+    Suggest a fitness goal based on basic user info.
+    Returns a tuple: (goal, explanation)
+    """
+    bmi = weight / ((height / 100) ** 2)
+    if bmi < 18.5:
+        return ("bulk", "Your BMI is below the healthy range. Consider bulking to gain weight and muscle mass.")
+    elif 18.5 <= bmi < 23:
+        if age < 30:
+            return ("lean_bulk", "You are in a healthy BMI range. Lean bulking is ideal for building muscle with minimal fat gain.")
+        else:
+            return ("maintain", "You are in a healthy BMI range. Maintaining your weight is a good option.")
+    elif 23 <= bmi < 25:
+        return ("maintain", "You are at the upper end of the healthy BMI range. Maintaining your weight is recommended.")
+    elif 25 <= bmi < 30:
+        return ("cut", "You are in the overweight range. Cutting to lose fat is recommended.")
+    else:
+        return ("cut", "You are in the obese range. Cutting to lose fat is strongly recommended for health.")

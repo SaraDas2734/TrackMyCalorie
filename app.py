@@ -4,7 +4,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from utils.calculations import calculate_bmr, calculate_tdee, calculate_macros
+from utils.calculations import calculate_bmr, calculate_tdee, calculate_macros, suggest_goal
 from utils.food_data import get_food_info, get_supplement_info, calculate_portion_nutrients
 from dotenv import load_dotenv
 import requests
@@ -178,11 +178,10 @@ def home():
 def profile():
     user = current_user
     edit_mode = request.args.get('edit') == '1'
-    if user and not edit_mode and request.method == 'GET' and is_profile_complete(user):
-        return render_template('profile.html', user=user, edit_mode=False)
+    suggestion = None
+    explanation = None
     if request.method == 'POST':
         if user:
-            # Update existing user
             user.name = request.form['name']
             user.age = int(request.form['age'])
             user.gender = request.form['gender']
@@ -194,7 +193,6 @@ def profile():
             flash('Profile updated successfully!', 'success')
             return redirect(url_for('profile'))
         else:
-            # Create new user
             user = User(
                 name=request.form['name'],
                 age=int(request.form['age']),
@@ -209,7 +207,16 @@ def profile():
             session['user_id'] = user.id
             flash('Profile created successfully!', 'success')
             return redirect(url_for('home'))
-    return render_template('profile.html', user=user, edit_mode=True)
+    # Suggestion logic for GET (edit mode)
+    if edit_mode:
+        # Try to get values from user or default to empty
+        gender = user.gender if user and user.gender else None
+        height = user.height if user and user.height else None
+        age = user.age if user and user.age else None
+        weight = user.weight if user and user.weight else None
+        if gender and height and age and weight:
+            suggestion, explanation = suggest_goal(gender, height, age, weight)
+    return render_template('profile.html', user=user, edit_mode=edit_mode, suggestion=suggestion, explanation=explanation)
 
 @app.route('/add_meal', methods=['GET', 'POST'])
 @login_required

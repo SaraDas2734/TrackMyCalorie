@@ -70,6 +70,12 @@
                         </div>
                         
                         <div class="mb-4">
+                            {% if suggestion and explanation %}
+                                <div class="alert alert-info" role="alert">
+                                    <strong>Suggestion:</strong> {{ suggestion|capitalize }}<br>
+                                    <span>{{ explanation }}</span>
+                                </div>
+                            {% endif %}
                             <label for="goal" class="form-label">Fitness Goal</label>
                             <select class="form-select" id="goal" name="goal" required>
                                 <option value="">Select your goal</option>
